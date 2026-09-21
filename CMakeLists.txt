@@ -1,12 +1,30 @@
-cmake_minimum_required(VERSION 3.10)
-set(NDK_PATH E:/ndk/android-ndk-r29)
-set(CMAKE_TOOLCHAIN_FILE ${NDK_PATH}/build/cmake/android.toolchain.cmake)
+cmake_minimum_required(VERSION 3.14)
+
+# --- Toolchain: CI / command line can override; falls back to local Windows NDK ---
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(DEFINED ENV{ANDROID_NDK_LATEST_HOME})
+        set(NDK_PATH $ENV{ANDROID_NDK_LATEST_HOME})
+    elseif(DEFINED ENV{ANDROID_NDK_HOME})
+        set(NDK_PATH $ENV{ANDROID_NDK_HOME})
+    else()
+        set(NDK_PATH E:/ndk/android-ndk-r29)
+    endif()
+    set(CMAKE_TOOLCHAIN_FILE ${NDK_PATH}/build/cmake/android.toolchain.cmake)
+endif()
+
 set(CMAKE_SYSTEM_NAME Android)
-set(CMAKE_BUILD_TYPE Release)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 set(CMAKE_SYSTEM_VERSION 30)
-set(ANDROID_PLATFORM 30)
-set(ANDROID_ABI arm64-v8a)
+if(NOT DEFINED ANDROID_PLATFORM)
+    set(ANDROID_PLATFORM 30)
+endif()
+if(NOT DEFINED ANDROID_ABI)
+    set(ANDROID_ABI arm64-v8a)
+endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/outputs/${ANDROID_ABI})
+
 project(UnrealMemoryTools)
 
 set(KITTYMEMORY_PATH KittyMemoryEx)
@@ -45,7 +63,10 @@ include_directories(
         src/GUI/native_surface)
 link_libraries(-llog -landroid -lEGL -lGLESv3 -lvulkan -lz -ldl)
 
-add_executable(UnrealMemoryTools ${UE_SRC} ${UE_PROFILE_SRC} ${AUTOFIX_SRC} ${GUI_SRC} src/executable.cpp src/Dumper.cpp src/UPackageGenerator.cpp src/SDKExplorer.cpp ${KITTYMEMORY_SRC} ${DEPS_PATH}/fmt/format.cc
+add_executable(UnrealMemoryTools
+        ${UE_SRC} ${UE_PROFILE_SRC} ${AUTOFIX_SRC} ${GUI_SRC}
+        src/executable.cpp src/Dumper.cpp src/UPackageGenerator.cpp src/SDKExplorer.cpp
+        ${KITTYMEMORY_SRC} ${DEPS_PATH}/fmt/format.cc
         src/AutoFix/NativeFunctionResolver.cpp
         src/AutoFix/PropertyOffsetFinder.cpp
         src/AutoFix/StructLayout.cpp
