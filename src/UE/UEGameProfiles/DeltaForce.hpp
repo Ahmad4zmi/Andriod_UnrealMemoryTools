@@ -16,12 +16,12 @@ public:
 
     std::string GetAppName() const override
     {
-        return "Delta Force(CN)";
+        return "Delta Force(GL)";
     }
 
     std::vector<std::string> GetAppIDs() const override
     {
-        return {"com.tencent.tmgp.dfm"};
+        return {"com.proxima.dfm"};
     }
 
     bool isUsingCasePreservingName() const override
